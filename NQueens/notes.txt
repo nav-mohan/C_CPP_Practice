@@ -1,0 +1,3 @@
+Start out with functional then switch over to OOP
+print the solutions solving animation. how do i animate the stdout of a c 
+prog? i'll have to build a gui of sorts
