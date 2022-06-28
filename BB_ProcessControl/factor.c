@@ -1,12 +1,11 @@
 /**
  * @file factor.c
  * @author navaneeth mohan
- * @brief Multi-threading to perform a computationally intensive task | Objective - Find Prime Numbers
+ * @brief Multi-processing to perform prime-factorization
  * @version 0.1
  * @date 2022-06-22
  * @copyright Copyright (c) 2022
 */
-// This is the admin file. it collects input from STDIN, forks to child processes, and prints to STDOUT
 
 
 #include <stdio.h>
@@ -15,100 +14,64 @@
 
 
 void factor(int n){
+    printf("\n----------------------\n");
+    printf("\n");
+    printf("%d: ",n);
     for (int i = 2; i <= n/2; i++){
         if (n%i == 0){
             printf("%d ", i);
         }
     }
+    printf("\n----------------------");
+    printf("\n");
+
 }
 
 int main(int argc, char* argv[]){
+    int parentPID = getpid();
     int size = 16;
-    // scanf("%d", &size);
-    printf("%d\n",argc);
     int* arr;
-    arr = (int *)malloc(sizeof(int) * size);
+    arr = (int*)malloc(sizeof(int) * size);
 
-    for(int j = 0; j < size; j++){
-        scanf("%d", &arr[j]);
+    printf("%d Writing to STDIN\n",getpid());
+    for (int i = 0; i < size; ++i)
+    {
+        arr[i] = (int*)malloc(sizeof(int));
+        scanf("%d",&arr[i]);
     }
 
-    int childnum = 0;
-    pid_t pid0 = fork();
-    childnum++;
-    pid_t pid1 = fork();
-    childnum++;
-    pid_t pid2 = fork();
-    childnum++;
-    pid_t pid3 = fork();
+    pid_t child1, child2, child3;
 
-    // the parent
-    if(pid0 && pid1 && pid2 && pid3){
+    if((child1=fork()) == 0){
+        printf("I'm child 1\n");
+        for (int i = 0; i < size/4; ++i)
+        {
+            factor(arr[i]);
+        }
+        _exit(0);
+    }
+    if((child2=fork()) == 0){
+        printf("I'm child 2\n");
+        for (int i = size/4; i < size/2; ++i)
+        {
+            factor(arr[i]);
+        }
+        _exit(0);
+    }
+    if((child3=fork()) == 0){
+        printf("I'm child 3\n");
+        for (int i = size/2; i < 3*size/4; ++i)
+        {
+            factor(arr[i]);
+        }
+        _exit(0);
+    }
+    if(getpid()==parentPID){
         printf("I'm the parent\n");
-        // wait until all child pid==0 i.e all of the child fork()s finish executing
-        int status;
-        pid_t child; // this is the PID of the child that died. wait() returns this value
-        child = wait(&status);
-        child = wait(&status);// we have to call wait() 4 times
-        child = wait(&status);// because we have 4 child processes
-        child = wait(&status);
-    }
-        // Im child 0
-    if(pid0==0 && childnum==0){
-        printf("I'm child%d\n",childnum);
-        int lines = size/4;
-        int start = 4 * childnum;
-        for (int i = 0; i < start+4; ++i)
+        for (int i = 3*size/4; i < size; ++i)
         {
-            printf("%d: ", arr[i]);
             factor(arr[i]);
-            printf("------------\n");
         }
         exit(0);
     }
-
-    // child 1
-    if(pid1==0 && childnum==1){
-        printf("I'm child%d\n",childnum);
-
-        int lines = size/4;
-        int start = 4 * childnum;
-        for (int i = 0; i < start+4; ++i)
-        {
-            printf("%d: ", arr[i]);
-            factor(arr[i]);
-            printf("------------\n");
-        }
-        exit(0);
-    }
-
-    // child 2
-    if(pid2==0 && childnum==2){
-        printf("I'm child%d\n",childnum);
-        int lines = size/4;
-        int start = 4 * childnum;
-        for (int i = 0; i < start+4; ++i)
-        {
-            printf("%d: ", arr[i]);
-            factor(arr[i]);
-            printf("------------\n");
-        }
-        exit(0);
-    }
-
-    // child 3
-    if(pid3==0 && childnum==3){
-        printf("I'm child%d\n",childnum);
-
-        int lines = size/4;
-        int start = 4 * childnum;
-        for (int i = 0; i < start+4; ++i)
-        {
-            printf("%d: ", arr[i]);
-            factor(arr[i]);
-            printf("------------\n");
-        }
-        exit(0);
-    }
-
 }
